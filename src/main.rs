@@ -1,6 +1,6 @@
 use reqwest::{header::{self, HeaderValue}, StatusCode};
-use tokio::{io::unix::AsyncFd, join, time::{self, error::Elapsed, interval, sleep, timeout, Duration}, sync::Mutex};
-use std::{collections::LinkedList, fs::File, io::Write, sync::Arc, thread::Thread, time::Instant, io::Read, option};
+use tokio::{io::{AsyncReadExt, AsyncWriteExt}, join, sync::Mutex, task, time::{self, error::Elapsed, interval, sleep, timeout, Duration}};
+use std::{collections::LinkedList, fs::File, io::{Read, Write}, option, sync::Arc, thread::{JoinHandle, Thread}, time::Instant};
 use serde_json::Result;
 use serde::{Deserialize, Serialize};
 
@@ -20,7 +20,7 @@ struct Sites{
 }
 
 fn parse_json() -> Vec<String>{
-    let json = File::open("sites.json").expect("Open file error");
+    let json = File::open("C:/Users/mrkar/OneDrive/Рабочий стол/Rust-projects/src/sites.json").expect("Open file error");
     let parsed_json: Sites = serde_json::from_reader(json).expect("deserialization error");
     return parsed_json.urls;
 }
@@ -47,22 +47,28 @@ async fn parse_site(site: String){
 
     let json_response_data = serde_json::to_string(&response_data).expect("Serialization error");
 
-    let mut file = File::create("responseData.json").unwrap();
+    let mut file = File::open("C:/Users/mrkar/OneDrive/Рабочий стол/Rust-projects/responseData.json").unwrap();
     file.write_all(json_response_data.as_bytes()).unwrap();
 
+    println!("{:?}", json_response_data);
     println!("{:?}", time_end);
     println!("{:?}", std::thread::current().id());
-    println!("Статус: {}", response.status());
-    println!("Заголовки: {:?}", response.headers());
 }
 
 #[tokio::main]
 async fn main(){
+    let start = Instant::now();
+    let mut task_vec: Vec<tokio::task::JoinHandle<()>> = Vec::new();
+    let site = parse_json();
+    
     for i in 0..parse_json().len(){
-        let site = parse_json();
-        println!("{:?}", std::thread::current().id());
         let task = tokio::spawn(parse_site(site[i].clone()));
-        task.await;
+        task_vec.push(task);
     }
-    //parse_site("https://doc.rust-lang.ru".to_string()).await;
+
+    for task in task_vec{
+        task.await.unwrap();
+    }
+
+    println!("{:?}", start.elapsed());
 }

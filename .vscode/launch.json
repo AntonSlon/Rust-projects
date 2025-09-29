@@ -17,7 +17,16 @@
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
-            "runtimeExecutable": "/home/user/rust-demo/.vscode"
+            "runtimeExecutable": "C:/Users/mrkar/OneDrive/Рабочий стол/Rust-projects/.vscode/launch.json",
+        },
+        {
+            "name": "Debug Rust Windows", 
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/${workspaceFolderBasename}.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
         }
     ]
 }
