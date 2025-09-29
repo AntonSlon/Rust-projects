@@ -20,7 +20,7 @@ struct Sites{
 }
 
 fn parse_json() -> Vec<String>{
-    let json = File::open("C:/Users/mrkar/OneDrive/Рабочий стол/Rust-projects/src/sites.json").expect("Open file error");
+    let json = File::open("sites.json").expect("Open file error");
     let parsed_json: Sites = serde_json::from_reader(json).expect("deserialization error");
     return parsed_json.urls;
 }
